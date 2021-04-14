@@ -26,7 +26,7 @@ c_vec=np.array([0.0,0.0,c_len])
 
 #definitions of Q-vectors
 #q-vectorはreciprocal lattice unit (a*, b*, c*のunit)で書くようにしましょう。a*を掛け算する必要はないです。
-q_len = 0.343 #=qa*=0.226*1.51812
+q_len = 0.16 #=qa*=0.226*1.51812
 Q1=np.array([q_len,0.0,0.0])
 Q2=np.array([0.0,q_len,0.0])
 
