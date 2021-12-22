@@ -2,8 +2,8 @@ import math
 import numpy as np
 
 #system size
-points_x = 150
-points_y = 150
+points_x = 300
+points_y = 300
 num_points=points_x*points_y
 
 #modulation period
@@ -60,6 +60,12 @@ FH.write("VECTORS vector float\n")
 FHT=open("temporary.txt","w")   #これはz成分だけ書いておくためのバッファー
 
 netMz=0
+
+Fq00=np.array([0,0,0])
+Fhqhq0=np.array([0,0,0])
+Fqq0=np.array([0,0,0])
+F2q00=np.array([0,0,0])
+
 #formatrix, S스핀 돌려주고, 원하는 방향으로 돌리기
 for ii in range(points_x):
     for jj in range(points_y):
@@ -79,7 +85,7 @@ for ii in range(points_x):
         SB4_vec=np.array([-1,-1,0])/math.sqrt(2)
 
 
-        Mz=0#2가 되면 스킬미온이 아니게됨. 스핀적분이 4pi가 되도록하려면..? 계산할 수도 있지만, 1(?)~1.9정도쯤 중앙부가 나오고 메론-안티메론상태가 없어지도록 해야함. 0일땐 제로자기장이라서 스킬미온이 아닌 메론-안티메론 상태가 됨.(IC-1)
+        Mz=0.43#2가 되면 스킬미온이 아니게됨. 스핀적분이 4pi가 되도록하려면..? 계산할 수도 있지만, 1(?)~1.9정도쯤 중앙부가 나오고 메론-안티메론상태가 없어지도록 해야함. 0일땐 제로자기장이라서 스킬미온이 아닌 메론-안티메론 상태가 됨.(IC-1)
         Sz_vec=np.array([0,0,Mz])
         S1=np.cos(phase1)*SA1_vec/3.464+2.464/3.464*np.sin(phase1)*SB1_vec #a direction? or a* direction?
         S2=np.cos(phase2)*SA2_vec/3.464+2.464/3.464*np.sin(phase2)*SB2_vec
@@ -87,9 +93,12 @@ for ii in range(points_x):
         S4=np.cos(phase4)*SA4_vec/1.513+0.513/1.513*np.sin(phase4)*SB4_vec
 
         S_all=(S1+S2)/2.662+(S3+S4)*1.662/2.662+Sz_vec
-        S_all=S_all/np.linalg.norm(S_all)*Arrow_scale
+        #S_all=S_all/np.linalg.norm(S_all)*Arrow_scale
         netMz=netMz+S_all[2]/float(points_x*points_y)#z成分なので、S_all[2]だけ抜き出して足し合わせる,#１スピンあたりのz成分に規格化する
 
+        Fq00=Fq00+S_all*np.exp((1j)*(2.0*np.pi)*(np.dot(Q1,r_vec2)))/float(points_x*points_y)
+        F2q00=F2q00+S_all*np.exp((1j)*(2.0*np.pi)*(np.dot(Q1*2,r_vec2)))/float(points_x*points_y)
+        Fqq0=Fqq0+S_all*np.exp((1j)*(2.0*np.pi)*(np.dot(Q3*2,r_vec2)))/float(points_x*points_y)
         FH.write("{0} {1} {2}\n".format(float(S_all[0]),float(S_all[1]),float(S_all[2])))
         FHT.write("{0}\n".format(float(S_all[2])))
 
@@ -101,6 +110,11 @@ FHT.close()
 #スピンベクトル、Sx, Sy, Szはここまでで終わり。
 print(Mz, 7*netMz/Arrow_scale,points_x, points_y)
 #最後に色付けのためにSz成分だけ書き出す。
+
+print("Fourier F(q,0,0)",abs(Fq00)/Arrow_scale)
+print("Fourier F(2q,0,0)",abs(F2q00)/Arrow_scale)
+print("Fourier F(q,q,0)",abs(Fqq0)/Arrow_scale)
+
 
 FHT=open("temporary.txt","r")
 for line in FHT:
